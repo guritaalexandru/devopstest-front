@@ -1,19 +1,7 @@
-import { useEffect, useState } from "react";
-
-function Component() {
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await fetch('https://devopstest2.thedemo.is/products');
-            const newData = await response.json();
-            setData(newData);
-        };
-
-        fetchData();
-    }, []);
-
-
+function Component(props) {
+    console.log('Here0');
+    console.log(props)
+    const {data} = props;
     if (data) {
         console.log(data);
         return (

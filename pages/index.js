@@ -3,7 +3,7 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Component from '../js/Component'
 
-export default function Home() {
+function Home({data}) {
   return (
     <div className={styles.container}>
       <Head>
@@ -16,7 +16,7 @@ export default function Home() {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
-        <Component/>
+        <Component data={data}/>
       </main>
 
       <footer className={styles.footer}>
@@ -34,3 +34,16 @@ export default function Home() {
     </div>
   )
 }
+
+export async function getServerSideProps() {
+  const response = await fetch('https://devopstest2.thedemo.is/products');
+  const newData = await response.json();
+
+  return {
+    props: {
+      data: newData
+    }
+  }
+}
+
+export default Home;
