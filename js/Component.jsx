@@ -39,7 +39,7 @@ function Component() {
             </div>
         );
     } else {
-        return null;
+        return <h1>Error</h1>;
     }
 }
 
