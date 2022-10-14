@@ -53,8 +53,8 @@ pipeline {
             }
 
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'DevOpsTest-pem', keyFileVariable: 'keyfile')]) {
-                    sh """ssh -tt -i ${keyfile} ubuntu@3.70.184.245 "rm -rf website && mkdir website && cd website && aws s3 sync s3://jenkins-pipeline-artifacts-gdm/website . && unzip next-app.zip -d .  && rm -rf next-app.zip && yarn && pm2 reload ecosystem.config.js" """
+                withCredentials([sshUserPrivateKey(credentialsId: 'DevOpsTest-pem', keyFileVariable: 'KEYFILE')]) {
+                    sh '""ssh -tt -i $KEYFILE ubuntu@3.70.184.245 "rm -rf website && mkdir website && cd website && aws s3 sync s3://jenkins-pipeline-artifacts-gdm/website . && unzip next-app.zip -d .  && rm -rf next-app.zip && yarn && pm2 reload ecosystem.config.js" ""'
                 }
             }
         }
