@@ -26,7 +26,6 @@ pipeline {
                 sh 'echo "Build archived"'
             }
         }
-    }
 
         stage('Upload to S3') {
             options {
@@ -47,4 +46,5 @@ pipeline {
                 s3Upload(file: 'next-app.zip', bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
             }
         }
+    }
 }
