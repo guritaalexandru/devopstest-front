@@ -5,9 +5,6 @@ pipeline {
         ZIP_NAME = "next-app.zip"
         BUCKET_NAME = "jenkins-pipeline-artifacts-gdm"
         APP_FOLDER = "website"
-        AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID = "AWS_CREDENTIALS"
-        AWS_SERVICE_ACCOUNT_REGION = "eu-central-1"
-        KEY_SECRET_ID = "DevOpsTest-pem"
     }
 
     stages {
@@ -37,7 +34,7 @@ pipeline {
 
         stage('Upload to S3') {
             options {
-                withAWS(credentials: "${AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID}", region: "${AWS_SERVICE_ACCOUNT_REGION}")
+                withAWS(credentials: "AWS_CREDENTIALS", region: "eu-central-1")
             }
 
             agent {
@@ -63,7 +60,7 @@ pipeline {
             }
 
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: '${KEY_SECRET_ID}', keyFileVariable: 'KEYFILE')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'DevOpsTest-pem', keyFileVariable: 'KEYFILE')]) {
                     sh '""ssh -tt -i $KEYFILE ubuntu@3.70.184.245 "rm -rf ${APP_FOLDER} && mkdir ${APP_FOLDER} && cd ${APP_FOLDER} && aws s3 sync s3://${BUCKET_NAME}/${APP_FOLDER} . && unzip ${ZIP_NAME} -d .  && rm -rf ${ZIP_NAME} && yarn && pm2 reload ecosystem.config.js" ""'
                 }
             }
