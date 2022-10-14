@@ -1,12 +1,5 @@
 pipeline {
     agent none
-
-    environment {
-        ZIP_NAME = "next-app.zip"
-        BUCKET_NAME = "jenkins-pipeline-artifacts-gdm"
-        APP_FOLDER = "website"
-    }
-
     stages {
         stage('Build') {
             agent {
@@ -27,14 +20,14 @@ pipeline {
 
             steps {
                 sh 'rm -rf .git && rm -rf node_modules'
-                sh 'zip -r ${ZIP_NAME} .'
-                stash includes: "${ZIP_NAME}", name: "${ZIP_NAME}"
+                sh 'zip -r next-app.zip .'
+                stash includes: 'next-app.zip', name: 'next-app.zip'
             }
         }
 
         stage('Upload to S3') {
             options {
-                withAWS(credentials: "AWS_CREDENTIALS", region: "eu-central-1")
+                withAWS(credentials: 'AWS_CREDENTIALS', region: 'eu-central-1')
             }
 
             agent {
@@ -46,9 +39,9 @@ pipeline {
             }
 
             steps {
-                unstash "${ZIP_NAME}"
-                s3Delete(bucket: '${BUCKET_NAME}', path: '${APP_FOLDER}/')
-                s3Upload(file: '${ZIP_NAME}', bucket: '${BUCKET_NAME}', path: '${APP_FOLDER}/')
+                unstash 'next-app.zip'
+                s3Delete(bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
+                s3Upload(file: 'next-app.zip', bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
             }
         }
 
