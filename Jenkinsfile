@@ -1,5 +1,15 @@
 pipeline {
     agent none
+
+    environment {
+        ZIP_NAME = "next-app.zip"
+        BUCKET_NAME = "jenkins-pipeline-artifacts-gdm"
+        APP_FOLDER = "website"
+        AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID = "AWS_CREDENTIALS"
+        AWS_SERVICE_ACCOUNT_REGION = "eu-central-1"
+        KEY_SECRET_ID = "DevOpsTest-pem"
+    }
+
     stages {
         stage('Build') {
             agent {
@@ -20,14 +30,14 @@ pipeline {
 
             steps {
                 sh 'rm -rf .git && rm -rf node_modules'
-                sh 'zip -r next-app.zip .'
-                stash includes: 'next-app.zip', name: 'next-app.zip'
+                sh 'zip -r ${ZIP_NAME} .'
+                stash includes: '${ZIP_NAME}', name: '${ZIP_NAME}'
             }
         }
 
         stage('Upload to S3') {
             options {
-                withAWS(credentials: 'AWS_CREDENTIALS', region: 'eu-central-1')
+                withAWS(credentials: '${AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID}', region: '${AWS_SERVICE_ACCOUNT_REGION}')
             }
 
             agent {
@@ -39,9 +49,9 @@ pipeline {
             }
 
             steps {
-                unstash 'next-app.zip'
-                s3Delete(bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
-                s3Upload(file: 'next-app.zip', bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
+                unstash '${ZIP_NAME}'
+                s3Delete(bucket: '${BUCKET_NAME}', path: '${APP_FOLDER}/')
+                s3Upload(file: '${ZIP_NAME}', bucket: '${BUCKET_NAME}', path: '${APP_FOLDER}/')
             }
         }
 
@@ -53,8 +63,8 @@ pipeline {
             }
 
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'DevOpsTest-pem', keyFileVariable: 'KEYFILE')]) {
-                    sh '""ssh -tt -i $KEYFILE ubuntu@3.70.184.245 "rm -rf website && mkdir website && cd website && aws s3 sync s3://jenkins-pipeline-artifacts-gdm/website . && unzip next-app.zip -d .  && rm -rf next-app.zip && yarn && pm2 reload ecosystem.config.js" ""'
+                withCredentials([sshUserPrivateKey(credentialsId: '${KEY_SECRET_ID}', keyFileVariable: 'KEYFILE')]) {
+                    sh '""ssh -tt -i $KEYFILE ubuntu@3.70.184.245 "rm -rf ${APP_FOLDER} && mkdir ${APP_FOLDER} && cd ${APP_FOLDER} && aws s3 sync s3://${BUCKET_NAME}/${APP_FOLDER} . && unzip ${ZIP_NAME} -d .  && rm -rf ${ZIP_NAME} && yarn && pm2 reload ecosystem.config.js" ""'
                 }
             }
         }
