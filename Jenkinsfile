@@ -37,7 +37,7 @@ pipeline {
 
         stage('Upload to S3') {
             options {
-                withAWS(credentials: '${AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID}', region: '${AWS_SERVICE_ACCOUNT_REGION}')
+                withAWS(credentials: "${AWS_SERVICE_ACCOUNT_CREDENTIALS_SECRET_ID}", region: "${AWS_SERVICE_ACCOUNT_REGION}")
             }
 
             agent {
