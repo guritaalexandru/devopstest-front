@@ -27,4 +27,24 @@ pipeline {
             }
         }
     }
+
+        stage('Upload to S3') {
+            options {
+                withAWS(credentials: '	AWS_CREDENTIALS', region: 'eu-central-1')
+            }
+
+            agent {
+                docker { image 'amazon/aws-cli:latest' }
+            }
+
+            when {
+                branch 'master'
+            }
+
+            steps {
+                unstash 'next-app.zip'
+                s3Delete(bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
+                s3Upload(file: 'next-app.zip', bucket: 'jenkins-pipeline-artifacts-gdm', path: 'website/')
+            }
+        }
 }
